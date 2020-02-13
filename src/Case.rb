@@ -1,4 +1,4 @@
-load "Lien.rb"
+require_relative "Lien.rb"
 
 
 # Une case du jeu avec des position ligne et colonne contenant une etiquette 
@@ -17,11 +17,22 @@ class Case
     attr_reader:colonne
     # Methode d ’ acces en lecture de @etiquetteCase
     attr_reader:etiquetteCase
+    # Methode d ’ acces en lecture / ecriture de @tabVoisins
     attr_accessor:tabVoisins
+    # Methode d ’ acces en lecture / ecriture de @tabTriangle
     attr_accessor:tabTriangle
 
+    # On rend privé la methode de classe new pour forcer l'utilisation de Case.creer
     private_class_method:new
 
+    # Initialisation d'une case
+    #
+    # === Parametres
+    #
+    # * + ligne + = > la ligne de la case dans la grille
+    # * + colonne + = > la colonne de la case dans la grille
+    # * + etiquetteCase + = > le nombre de lien total pouvant etre relié à cette case
+    #
     def initialize(ligne,colonne,etiquetteCase)
         @ligne=ligne
         @colonne=colonne
@@ -31,12 +42,61 @@ class Case
 
     end
 
+
+    # Creation d'une case
+    #
+    # === Parametres
+    #
+    # * + ligne + = > la ligne de la case dans la grille
+    # * + colonne + = > la colonne de la case dans la grille
+    # * + etiquetteCase + = > le nombre de lien total pouvant etre relié à cette case
+    #
+    # === Retour
+    #
+    # la case creer
+    #
     def Case.creer(ligne,colonne,etiquetteCase)
         new(ligne,colonne,etiquetteCase)
     end
 
-    def creerLien(posTabTriangle,hypothese,tabLien)
-        if(self.tabTriangle[posTabTriangle]!=false)
+
+    # compte le nb de lien attaché a une case
+    #
+    # === Parametres
+    #
+    # * + tabLien + = > le tableau des liens
+    #
+    # === Retour
+    #
+    # le nombre de lien
+    #
+    def nbLienCase(tabLien)
+        compteur=0
+        tabLien.each do |lien|
+            if( self==lien.case1 || self==lien.case2 )
+                compteur+=1
+            end
+        end
+        return compteur
+    end
+
+
+
+
+    # creation d'un lien a partir de cette case dans une certaine direction
+    #
+    # === Parametres
+    #
+    # * + posTabTriangle + = > entier qui correspond a la direction de création du lien,0==nord,1==est,2==sud,3==ouest
+    # * + hypothese + = > boolean qui correspond a l'état du lien, si il est créer ou non lors d'une hypothese
+    # * + tabLien + = > le tableau de lien de la grille
+    #
+    # === Retour
+    #
+    # rien
+    #
+    def creerLien(posTabTriangle,hypothese,tabLien)#ATTENTION : a gerer le croisement de lien ici avant creation.
+        if(self.tabTriangle[posTabTriangle]!=false && nbLienCase(tabLien)<@etiquetteCase   )
             l=Lien.creer(self,self.tabVoisins[posTabTriangle],hypothese)
             c=0
             tabLien.each do  |lien|
